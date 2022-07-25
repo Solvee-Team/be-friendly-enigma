@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from firebase_admin import initialize_app
+from datetime import timedelta
 
 
 SECRET_KEY = 'django-insecure-b3y%-yh&dq9f=0zc@_fg8a-kvksm(*p8qr=uu9^4wvhv!q-3^('
@@ -57,6 +58,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
+}
+
+SIMPLE_JWT = {
+    # default values to custom change for testing
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 MIDDLEWARE = [
