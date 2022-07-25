@@ -2,11 +2,12 @@ import os
 from pathlib import Path
 from firebase_admin import initialize_app
 from datetime import timedelta
+from decouple import config
 
 
-SECRET_KEY = 'django-insecure-b3y%-yh&dq9f=0zc@_fg8a-kvksm(*p8qr=uu9^4wvhv!q-3^('
+SECRET_KEY = config('SECRET_KEY')
 
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ["*"]
 
@@ -41,7 +42,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "user",
     "chat",
-    "notifications",
     "corsheaders",
     "fcm_django",
     "django_celery_beat",
@@ -61,7 +61,6 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    # default values to custom change for testing
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=20),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
@@ -109,9 +108,6 @@ WSGI_APPLICATION = 'friendly_enigma.wsgi.application'
 ASGI_APPLICATION = 'friendly_enigma.routing.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -119,9 +115,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -140,9 +133,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# Internationalization
-# https://docs.djangoproject.com/en/3.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -153,14 +143,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
 STATIC_URL = '/static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -173,7 +156,6 @@ CHANNEL_LAYERS = {
 
 SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
-    # todo change in non local env to RSA private key
     "SIGNING_KEY": SECRET_KEY,
     "UPDATE_LAST_LOGIN": True,
 }

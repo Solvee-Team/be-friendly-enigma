@@ -15,7 +15,6 @@ from chat import urls
 import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "friendly_enigma.settings")
-# os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
 
 
 application = get_asgi_application()
@@ -25,7 +24,6 @@ application = get_asgi_application()
 application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
-        # "websocket": URLRouter(urls.websocket_urlpatterns),
         "websocket": AllowedHostsOriginValidator(
             AuthMiddlewareStack(
                 URLRouter(urls.websocket_urlpatterns)

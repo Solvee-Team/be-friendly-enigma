@@ -130,7 +130,6 @@ def get_user_by_token(data):
 class ChatConsumer(AsyncWebsocketConsumer):
 
     async def _after_message_save(self, msg: Message, rid: int, user_pk: str):
-        print("bbbbbbbb/bbbbbbbbbbbbbbbbbbbbbbbb")
         ev = {
             "type": "message_id_created",
             "random_id": rid,
@@ -387,7 +386,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                             text, from_=self.user, to=recipient
                         )
                         await self._after_message_save(msg, rid=rid, user_pk=user_pk)
-    #
+
     # Receive message from WebSocket
 
     async def receive(self, text_data=None, bytes_data=None):

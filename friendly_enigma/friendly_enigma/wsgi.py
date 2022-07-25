@@ -15,7 +15,5 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "friendly_enigma.settings")
 os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
 
 
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'friendly_enigma.settings')
-
 application = get_wsgi_application()
 application = WhiteNoise(application)

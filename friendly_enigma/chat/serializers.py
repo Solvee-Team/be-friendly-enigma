@@ -4,8 +4,6 @@ import os
 from django.db.models import Q
 from rest_framework import serializers
 from user.models import User
-# from django.contrib.auth.models import User
-from drf_yasg.utils import swagger_serializer_method
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -35,7 +33,6 @@ class MessageSerializer(serializers.ModelSerializer):
             "is_read",
         ]
 
-    @swagger_serializer_method(serializer_or_field=serializers.BooleanField)
     def get_is_outgoing(self, obj):
         return self.context["user"] == obj.sender
 
@@ -49,7 +46,6 @@ class DialogsSerializer(serializers.ModelSerializer):
         model = Dialog
         fields = ["user", "last_message", "unread_count"]
 
-    @swagger_serializer_method(serializer_or_field=serializers.IntegerField)
     def get_unread_count(self, obj):
         if "no_details" in self.context:
             return None
@@ -57,7 +53,6 @@ class DialogsSerializer(serializers.ModelSerializer):
             dialog=obj.pk, recipient=self.context["user"]
         )
 
-    @swagger_serializer_method(serializer_or_field=MessageSerializer)
     def get_last_message(self, obj):
         if "no_details" in self.context:
             return None
@@ -68,7 +63,6 @@ class DialogsSerializer(serializers.ModelSerializer):
             else None
         )
 
-    @swagger_serializer_method(serializer_or_field=ChatUserSerializer)
     def get_user(self, obj):
         other = obj.users.exclude(pk=self.context["user"].id).first()
         return ChatUserSerializer(other, context=self.context).data if other else None
