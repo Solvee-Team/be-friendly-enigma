@@ -13,7 +13,6 @@ from django.core.asgi import get_asgi_application
 import os
 import django
 
-# os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "friendly_enigma.settings")
 django.setup()
 

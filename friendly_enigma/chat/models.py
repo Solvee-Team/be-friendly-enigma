@@ -9,10 +9,6 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth import get_user_model
 from typing import Optional, Any
 
-import logging
-
-logger = logging.getLogger("chat")
-
 UserModel: AbstractBaseUser = get_user_model()
 
 

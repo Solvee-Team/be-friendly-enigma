@@ -160,5 +160,5 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": True,
 }
 
-CELERY_BROKER_URL = os.environ.get("RMQ_HOST", "amqp://guest:guest@127.0.0.1:5672/")
-CELERY_RESULT_BACKEND = "cache+memcached://127.0.0.1:11211/"
+CELERY_BROKER_URL = config('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')

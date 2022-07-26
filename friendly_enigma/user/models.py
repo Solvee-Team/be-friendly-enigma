@@ -1,4 +1,3 @@
-# from django.contrib.auth.models import UserManager
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -46,15 +45,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         _("date joined"),
         default=timezone.now,
     )
-
-    # @property
-    # def is_staff(self):
-    #     return self.is_staff
-    #
-    # @property
-    # def is_superuser(self):
-    #     return self.is_superuser
-    #
-    # @property
-    # def is_active(self):
-    #     return self.is_active

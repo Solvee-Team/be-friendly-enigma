@@ -3,13 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.pagination import CursorPagination, PageNumberPagination
 from rest_framework import generics, status, filters
 from rest_framework.response import Response
-from django_filters.rest_framework import (
-    DjangoFilterBackend,
-    FilterSet,
-    ChoiceFilter,
-    DateTimeFilter,
-)
-from django.shortcuts import render
+from django_filters.rest_framework import FilterSet, DateTimeFilter
 from .models import Message, Dialog
 from .serializers import (
     ChatUserSerializer,
@@ -21,15 +15,8 @@ from .serializers import (
 from user.models import User
 from django.db.models import Q
 from django.db.models import Count
-import logging
 from django.contrib.auth import get_user_model
 User = get_user_model()
-
-logger = logging.getLogger("chat.consumers")
-
-
-def index(request):
-    return render(request, "chat/base.html")
 
 
 class CursorSetPagination(CursorPagination):
@@ -54,9 +41,6 @@ class MessageFilter(FilterSet):
 
 
 class MessageList(generics.ListAPIView):
-    """
-    Get Chat Messages for authenticated user
-    """
 
     permission_classes = [IsAuthenticated]
     pagination_class = CursorSetPagination
@@ -86,9 +70,6 @@ class MessageList(generics.ListAPIView):
 
 
 class DialogList(generics.ListAPIView):
-    """
-    Get Chat Dialogs for authenticated user (1-1 chat with other users)
-    """
 
     permission_classes = [IsAuthenticated]
     pagination_class = CursorSetPagination
@@ -118,9 +99,6 @@ class UsersForMessagesList(APIView):
 
 
 class ReadMessagesView(generics.RetrieveAPIView):
-    """
-    Mark Chat Messages (from a specific user ) as Read
-    """
 
     permission_classes = [IsAuthenticated]
     serializer_class = ReadMessagesSerializer
@@ -137,9 +115,6 @@ class ReadMessagesView(generics.RetrieveAPIView):
 
 
 class UnreadMessagesCountView(generics.RetrieveAPIView):
-    """
-    Get unread messages count of authenticated user
-    """
 
     permission_classes = [IsAuthenticated]
     serializer_class = UnreadMessagesCountSerializer

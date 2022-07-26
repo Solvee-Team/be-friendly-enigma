@@ -11,13 +11,10 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from channels.auth import AuthMiddlewareStack
-from chat import urls
+from chat import websocket_urls
 import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "friendly_enigma.settings")
-
-
-application = get_asgi_application()
 
 application = get_asgi_application()
 
@@ -26,7 +23,7 @@ application = ProtocolTypeRouter(
         "http": get_asgi_application(),
         "websocket": AllowedHostsOriginValidator(
             AuthMiddlewareStack(
-                URLRouter(urls.websocket_urlpatterns)
+                URLRouter(websocket_urls.websocket_urlpatterns)
             )
         )
     }

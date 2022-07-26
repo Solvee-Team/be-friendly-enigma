@@ -7,8 +7,7 @@ from django.conf import settings
 from django.http import HttpRequest
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.settings import api_settings
-from user.jwt_authenticate_eligible import JWTAuthenticateEligible
-import logging
+from user.jwt_authenticate import JWTAuthenticate
 import json
 import enum
 import sys
@@ -19,7 +18,6 @@ try:
 except ImportError:
     TypedDict = dict
 
-logger = logging.getLogger("chat.consumers")
 TEXT_MAX_LENGTH = getattr(settings, "TEXT_MAX_LENGTH", 65535)
 
 
@@ -114,7 +112,7 @@ def get_user_by_token(data):
         token = data["text"]
         fakeRequest.META = {}
         fakeRequest.META[key] = f"Bearer {token}"
-        auth = JWTAuthenticateEligible()
+        auth = JWTAuthenticate()
         return auth.authenticate(fakeRequest)
 
     except Exception as e:
@@ -122,7 +120,6 @@ def get_user_by_token(data):
             ErrorTypes.MessageParsingError,
             # f"User Login error - {e}",
         )
-        logger.info(error)
 
     return None
 
@@ -137,9 +134,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             "sender": str(msg.sender.id),
             "receiver": str(msg.recipient.id),
         }
-        logger.info(
-            f"Message with id {msg.id} saved, firing events to {user_pk} & {self.group_name}"
-        )
         await self.channel_layer.group_send(user_pk, ev)
         await self.channel_layer.group_send(self.group_name, ev)
         new_unreads = await get_unread_count(msg.dialog, user_pk)
@@ -159,14 +153,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if close_code != 4001 and getattr(self, "user", None) is not None:
-            logger.info(
-                f"User {self.user.pk} disconnected, removing channel {self.channel_name} from group {self.group_name}"
-            )
             await self.channel_layer.group_discard(self.group_name, self.channel_name)
             dialogs = await get_groups_to_add(self.user)
-            logger.info(
-                f"User {self.user.pk} disconnected, sending 'user_went_offline' to {dialogs} dialog groups"
-            )
             for d in dialogs:
                 await self.channel_layer.group_send(
                     str(d), {"type": "user_went_offline", "user_pk": str(self.user.pk)}
@@ -175,16 +163,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def handle_received_message(
         self, msg_type: MessageTypes, data: Dict[str, str]
     ) -> Optional[ErrorDescription]:
-        logger.info(
-            f"Received message type {msg_type.name} from user {self.group_name} with data {data}"
-        )
         if (
             msg_type == MessageTypes.WentOffline
             or msg_type == MessageTypes.WentOnline
             or msg_type == MessageTypes.MessageIdCreated
             or msg_type == MessageTypes.ErrorOccured
         ):
-            logger.info(f"Ignoring message {msg_type.name}")
+            pass
         else:
             if msg_type == MessageTypes.Login:
                 user = await get_user_by_token(data)
@@ -192,9 +177,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     self.user: AbstractBaseUser = user[0]
                     self.group_name: str = str(self.user.pk)
                     self.sender_username: str = f"{self.user.first_name} {self.user.last_name}"
-                    logger.info(
-                        f"User {self.user.pk} connected, adding {self.channel_name} to {self.group_name}"
-                    )
                     await self.send(
                         text_data=json.dumps(
                             {
@@ -208,9 +190,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         self.group_name, self.channel_name
                     )
                     dialogs = await get_groups_to_add(self.user)
-                    logger.info(
-                        f"User {self.user.pk} connected, sending 'user_went_online' to {dialogs} dialog groups"
-                    )
                     for d in dialogs:  # type: int
                         if str(d) != self.group_name:
                             await self.channel_layer.group_send(
@@ -227,9 +206,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 return None
             elif msg_type == MessageTypes.IsTyping:
                 dialogs = await get_groups_to_add(self.user)
-                logger.info(
-                    f"User {self.user.pk} is typing, sending 'is_typing' to {dialogs} dialog groups"
-                )
                 for d in dialogs:
                     if str(d) != self.group_name:
                         await self.channel_layer.group_send(
@@ -262,9 +238,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 else:
                     user_pk = data["user_pk"]
                     mid = data["message_id"]
-                    logger.info(
-                        f"Validation passed, marking msg from {user_pk} to {self.group_name} with id {mid} as read"
-                    )
                     await self.channel_layer.group_send(
                         user_pk,
                         {
@@ -276,9 +249,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     )
                     recipient: Optional[AbstractBaseUser] = await get_user_by_pk(
                         user_pk
-                    )
-                    logger.info(
-                        f"DB check if user {user_pk} exists resulted in {recipient}"
                     )
                     if not recipient:
                         return (
@@ -352,9 +322,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     # saved to the database. I.e. for the client it is 'pending delivery' and can be
                     # considered delivered only when it's saved to database and received a proper id,
                     # which is then broadcast separately both to sender & receiver.
-                    logger.info(
-                        f"Validation passed, sending text message from {self.group_name} to {user_pk}"
-                    )
                     await self.channel_layer.group_send(
                         user_pk,
                         {
@@ -370,18 +337,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     recipient: Optional[AbstractBaseUser] = await get_user_by_pk(
                         user_pk
                     )
-                    logger.info(
-                        f"DB check if user {user_pk} exists resulted in {recipient}"
-                    )
                     if not recipient:
                         return (
                             ErrorTypes.InvalidUserPk,
                             f"User with pk {user_pk} does not exist",
                         )
                     else:
-                        logger.info(
-                            f"Will save text message from {self.user} to {recipient}"
-                        )
                         msg = await save_text_message(
                             text, from_=self.user, to=recipient
                         )
@@ -390,11 +351,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
     # Receive message from WebSocket
 
     async def receive(self, text_data=None, bytes_data=None):
-        logger.info(f"Receive fired")
         error: Optional[ErrorDescription] = None
         try:
             text_data_json = json.loads(text_data)
-            logger.info(f"From {self.group_name} received '{text_data_json}")
             if not ("msg_type" in text_data_json):
                 error = (ErrorTypes.MessageParsingError, "msg_type not present in json")
             else:
@@ -416,7 +375,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             error = (ErrorTypes.MessageParsingError, f"jsonDecodeError - {e}")
         if error is not None:
             error_data = {"msg_type": MessageTypes.ErrorOccured, "error": error}
-            logger.info(f"Will send error {error_data} to {self.group_name}")
             await self.send(text_data=json.dumps(error_data))
 
     async def new_unread_count(self, event):
