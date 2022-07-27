@@ -5,9 +5,12 @@ from typing import List, Set, Awaitable, Optional, Dict, Tuple
 from django.contrib.auth.models import AbstractBaseUser
 from django.conf import settings
 from django.http import HttpRequest
+from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.settings import api_settings
-from user.jwt_authenticate import JWTAuthenticate
+from rest_framework.exceptions import PermissionDenied
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from user.models import User
 import json
 import enum
 import sys
@@ -19,6 +22,13 @@ except ImportError:
     TypedDict = dict
 
 TEXT_MAX_LENGTH = getattr(settings, "TEXT_MAX_LENGTH", 65535)
+
+
+class JWTAuthenticate(JWTAuthentication):
+
+    def authenticate(self, request):
+        result = super().authenticate(request)
+        return result
 
 
 class ErrorTypes(enum.IntEnum):

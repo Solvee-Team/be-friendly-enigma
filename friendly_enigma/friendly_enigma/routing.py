@@ -16,8 +16,6 @@ import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "friendly_enigma.settings")
 
-application = get_asgi_application()
-
 application = ProtocolTypeRouter(
     {
         "http": get_asgi_application(),
