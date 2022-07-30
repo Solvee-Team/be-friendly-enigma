@@ -24,8 +24,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
     )
     date_of_birth = models.DateField(null=True)
-    objects = CustomUserManager()
-    USERNAME_FIELD = "email"
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
@@ -40,8 +38,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=True,
         help_text=_("Designates whether this user should be treated as active."),
     )
-    USERNAME_FIELD = "email"
     date_joined = models.DateTimeField(
         _("date joined"),
         default=timezone.now,
     )
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = "email"
