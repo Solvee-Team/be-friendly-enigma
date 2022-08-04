@@ -1,0 +1,19 @@
+django==4.0.6
+djangorestframework==3.13.1
+gunicorn==20.1.0
+psycopg2==2.9.1
+pyJWT
+pytz==2021.1
+whitenoise==5.3.0
+Celery==5.2.2
+Pillow==9.0.1
+python-memcached==1.59
+django-model-utils== 4.2.0
+django-multiselectfield==0.1.12
+django-import-export==2.7.0
+channels-redis==3.3.1
+channels_rabbitmq==4.0.0
+channels>=3.0.3,<4.0
+jsonfield==3.1.0
+django-celery-beat==2.2.1
+python-decouple==3.6
