@@ -5,16 +5,14 @@ from .managers import CustomUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.utils import timezone
 
+from phonenumber_field.modelfields import PhoneNumberField
+
 from .fields import CompressedImageField
+
+from .constants import CHAT_STYLES, THEMES
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(
-        unique=True,
-        max_length=255,
-        blank=False,
-    )
-
     first_name = models.CharField(
         _("first name"),
         max_length=30,
@@ -44,9 +42,25 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=timezone.now,
     )
     image = CompressedImageField(null=True, blank=True)
+    phone_number = PhoneNumberField(
+        unique=True,
+        blank=False,
+        null=True
+    )
+    last_visit = models.DateTimeField(_("last visit"), blank=True, null=True)
+    chat_style = models.CharField(
+        max_length=100, choices=CHAT_STYLES, null=True, blank=True
+    )
+    theme = models.CharField(
+        max_length=100, choices=THEMES, null=True, blank=True
+    )
+
     objects = CustomUserManager()
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = "phone_number"
+
+    def __str__(self):
+        return self.first_name
 
 
 class TempUser(models.Model):

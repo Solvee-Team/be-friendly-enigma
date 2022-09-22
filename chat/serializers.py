@@ -12,7 +12,7 @@ class ChatUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["pk", "first_name", "last_name", "email"]
+        fields = ["pk", "first_name", "last_name", "phone_number"]
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -65,7 +65,6 @@ class DialogsSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         other = obj.users.exclude(pk=self.context["user"].id).first()
-        return ChatUserSerializer(other, context=self.context).data if other else None
 
 
 class ReadMessagesSerializer(serializers.Serializer):
