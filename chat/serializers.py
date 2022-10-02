@@ -65,6 +65,7 @@ class DialogsSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         other = obj.users.exclude(pk=self.context["user"].id).first()
+        return ChatUserSerializer(other, context=self.context).data if other else None
 
 
 class ReadMessagesSerializer(serializers.Serializer):
