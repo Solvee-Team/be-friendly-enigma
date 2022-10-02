@@ -111,6 +111,17 @@ class UpdateThemeSerializer(serializers.ModelSerializer):
         model = User
         fields = ["theme"]
 
-        def update(self, instance, validated_data):
+        def update(self, validated_data):
             new_theme = validated_data["theme"]
             User.objects.update(theme=new_theme)
+
+
+class AddContactSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=12, write_only=True, required=True)
+
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        phone_number = validated_data["phone_number"]
+        added_contact = User.objects.get(phone_number=phone_number)
+        user.contacts.add(added_contact)
+        return UserSerializer(added_contact)

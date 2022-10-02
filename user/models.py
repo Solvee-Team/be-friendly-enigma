@@ -41,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         _("date joined"),
         default=timezone.now,
     )
-    image = CompressedImageField(null=True, blank=True)
+    image = CompressedImageField(null=True, blank=True, default='/media/images/default.png')
     phone_number = PhoneNumberField(
         unique=True,
         blank=False,
@@ -54,6 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     theme = models.CharField(
         max_length=100, choices=THEMES, null=True, blank=True
     )
+    contacts = models.ManyToManyField("User", blank=True)
 
     objects = CustomUserManager()
 

@@ -3,7 +3,7 @@ from .registration_views import RegisterBaseInfoView
 from .views import (
     MyUserInfoView, UserUpdatePasswordView,
     DecoratedTokenRefreshView, DeleteAcount, UpdateChatStyle,
-    UpdateTheme, UserSearchView
+    UpdateTheme, UserSearchView, AddContact
 )
 
 app_name = "auth_app"
@@ -18,4 +18,6 @@ urlpatterns = [
     path("update-theme", UpdateTheme.as_view(), name="update-theme"),
     path("chat-style-and-theme", UpdateTheme.as_view(), name="chat-style-and-theme"),
     path("user-search", UserSearchView.as_view(), name="get-users"),
+    path("add-contact", AddContact.as_view(), name="add-contact"),
+
 ]

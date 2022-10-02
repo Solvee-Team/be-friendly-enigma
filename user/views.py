@@ -17,7 +17,7 @@ from .models import User
 from .serializers import (
     UserSerializer, UserUpdatePasswordSerializer,
     TokenRefreshSerializer, UpdateChatStyleSerializer,
-    UpdateThemeSerializer
+    UpdateThemeSerializer, AddContactSerializer
 )
 
 
@@ -104,3 +104,22 @@ class UpdateTheme(APIView):
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors)
+
+
+class AddContact(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = AddContactSerializer(
+            request.user, data=request.data, context={"request": request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
+    def get(self, request):
+        print(request.user)
+        contacts = User.objects.filter(
+            id__in=request.user.contacts.all())
+        serializer = UserSerializer(contacts, many=True)
+        return Response(serializer.data)
