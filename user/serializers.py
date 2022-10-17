@@ -43,6 +43,7 @@ class RegisterBaseInfoSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     last_visit = serializers.DateTimeField(format="%Y-%m-%dT%H:%M")
+    name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -55,7 +56,11 @@ class UserSerializer(serializers.ModelSerializer):
             "last_visit",
             "chat_style",
             "theme",
+            "name"
         ]
+
+    def get_name(self, obj):
+        return obj.first_name + ' ' + obj.last_name
 
 
 class UserUpdatePasswordSerializer(serializers.Serializer):
