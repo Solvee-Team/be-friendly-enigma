@@ -41,7 +41,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         _("date joined"),
         default=timezone.now,
     )
-    image = CompressedImageField(null=True, blank=True, default='/media/images/default.png')
+    image = CompressedImageField(
+        null=True, blank=True, default='cameraImg_NNGnCue.jpg')
     phone_number = PhoneNumberField(
         unique=True,
         blank=False,
