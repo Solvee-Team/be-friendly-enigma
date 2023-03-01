@@ -75,11 +75,6 @@ class DialogList(generics.ListAPIView):
     pagination_class = CursorSetPagination
     serializer_class = DialogsSerializer
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context["user"] = self.request.user
-        return context
-
     def get_queryset(self):
         qs = (
             Dialog.objects.annotate(c=Count("users"))
@@ -87,6 +82,11 @@ class DialogList(generics.ListAPIView):
             .filter(c__gt=1)
         )
         return qs.order_by("-created")
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["user"] = self.request.user
+        return context
 
 
 class UsersForMessagesList(APIView):

@@ -25,7 +25,7 @@ class Dialog(TimeStampedModel):
         return f"Dialog {self.pk} - {self.users.count()} users"
 
     def list_users(self):
-        return ", ".join([p.email for p in self.users.all()])
+        return ", ".join([p.phone_number for p in self.users.all()])
 
     def messages_count(self):
         return self.messages.count()

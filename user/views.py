@@ -1,14 +1,24 @@
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import authenticate
+import django_filters
+from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
-
+from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework import status
 
 from .models import User
-from .serializers import UserSerializer, UserUpdatePasswordSerializer
+from .serializers import (
+    UserSerializer, UserUpdatePasswordSerializer,
+    TokenRefreshSerializer, UpdateChatStyleSerializer,
+    UpdateThemeSerializer, AddContactSerializer
+)
 
 
 class MyUserInfoView(APIView):
@@ -43,3 +53,73 @@ class UserUpdatePasswordView(generics.UpdateAPIView):
     def put(self, request, *args, **kwargs):
         super().put(request, *args, **kwargs)
         return Response({"status": "ok", "message": _("Password changed.")})
+
+
+class UserSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        phone_number = self.request.query_params.get('phone_number')
+        phone_number = phone_number.replace(" ", "+")
+        queryset = User.objects.all()
+        if phone_number:
+            queryset = queryset.filter(phone_number__icontains=phone_number)
+        serializer = UserSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class DecoratedTokenRefreshView(TokenRefreshView):
+    serializer_class = TokenRefreshSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
+class DeleteAcount(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = User.objects.get(id=request.user.id)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UpdateChatStyle(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = UpdateChatStyleSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateTheme(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
+
+class AddContact(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = AddContactSerializer(
+            request.user, data=request.data, context={"request": request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
+    def get(self, request):
+        print(request.user)
+        contacts = User.objects.filter(
+            id__in=request.user.contacts.all())
+        serializer = UserSerializer(contacts, many=True)
+        return Response(serializer.data)

@@ -13,3 +13,10 @@ channels>=3.0.3,<4.0
 jsonfield==3.1.0
 django-celery-beat==2.2.1
 python-decouple==3.6
+django-cors-headers==3.13.0
+fcm-django==1.0.12
+djangorestframework-simplejwt==5.2.0
+django-filter==22.1
+django-phonenumberfield==6.3.0
+django-phonenumbers==1.0.1
+drf-extra-fields==3.4.0
